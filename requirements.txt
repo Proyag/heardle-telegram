@@ -1,3 +1,4 @@
 ytmusicapi
 youtube-dl
 pydub
+python-telegram-bot
