@@ -1,7 +1,7 @@
-import sys
 import random
 import logging
 from heardle_telegram.ytmusic_library import Library
+from heardle_telegram.download_song import download_song
 
 logging.basicConfig(level=logging.INFO)
 
@@ -12,6 +12,9 @@ class Song:
         self.id = song_info['videoId']
         self.url = f"https://music.youtube.com/watch?v={self.id}"
 
+    def get_url(self) -> str:
+        return self.url
+
     def __str__(self):
         return f"{self.title} - {self.artist}"
 
@@ -20,6 +23,8 @@ class Song:
 
 songs = Library().get_song_list()
 
-# Pick a random song
 song = Song(random.choice(songs))
 logging.info(f"Chosen song: {song}")
+
+# Download the song
+download_song(song.get_url())

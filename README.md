@@ -4,6 +4,7 @@ Like [Heardle](https://www.heardle.app), but with a customised list of songs and
 ## Setup
 ```bash
 conda create -n heardle-telegram python=3.9
+sudo apt install ffmpeg
 pip install -r requirements.txt
 ```
 Then set up ytmusicapi headers according to https://ytmusicapi.readthedocs.io/en/latest/setup.html.
