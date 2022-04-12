@@ -8,9 +8,9 @@ sudo apt install ffmpeg
 pip install -r requirements.txt
 ```
 Then set up ytmusicapi headers according to https://ytmusicapi.readthedocs.io/en/latest/setup.html.
-
-<details>
-<summary>Firefox </summary>
+* Go to https://music.youtube.com and ensure you are logged in
+* Find an authenticated POST request. The simplest way is to filter by /browse using the search bar of the developer tools. If you don’t see the request, try scrolling down a bit or clicking on the library button in the top bar.
+<details><summary>Firefox </summary>
 
 * Verify that the request looks like this: **Status** 200, **Method** POST, **Domain** music.youtube.com, **File** `browse?...`
 * Copy the request headers (right click > copy > copy request headers)
