@@ -4,9 +4,6 @@ from heardle_telegram.process_song import Song, ClipGenerator
 
 logging.basicConfig(level=logging.INFO)
 
-# # Get the full list of songs
-# songs = Library().get_song_list()
-
 # Pick a random song
 song = Library().get_random_song()
 logging.info(f"Chosen song: {song}")
