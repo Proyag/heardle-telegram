@@ -1,15 +1,14 @@
-import random
 import logging
 from heardle_telegram.ytmusic_library import Library
-from heardle_telegram.download_song import Song, ClipGenerator
+from heardle_telegram.process_song import Song, ClipGenerator
 
 logging.basicConfig(level=logging.INFO)
 
-# Get the full list of songs
-songs = Library().get_song_list()
+# # Get the full list of songs
+# songs = Library().get_song_list()
 
 # Pick a random song
-song = Song(random.choice(songs))
+song = Library().get_random_song()
 logging.info(f"Chosen song: {song}")
 
 clip_generator = ClipGenerator()
