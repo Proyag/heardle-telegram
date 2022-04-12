@@ -26,5 +26,5 @@ Then set up ytmusicapi headers according to https://ytmusicapi.readthedocs.io/en
 Run a game with
 
 ```bash
-python heardle.py
+python heardle-telegram.py
 ```
