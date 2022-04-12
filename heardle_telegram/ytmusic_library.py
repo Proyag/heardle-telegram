@@ -42,4 +42,6 @@ class Library:
         return self.songs
 
     def get_random_song(self) -> Song:
-        return random.choice(self.songs)
+        song = random.choice(self.songs)
+        logging.info(f"Chosen song: {song}")
+        return song

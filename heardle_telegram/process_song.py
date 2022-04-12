@@ -52,10 +52,14 @@ class ClipGenerator:
         with youtube_dl.YoutubeDL(self.dl_opts) as ydl:
             ydl.download([song.get_url()])
 
-    def generate_clips(self, song):
+    def generate_clips(self):
         full_song = AudioSegment.from_mp3(self.full_song)
         logging.info(f"Full song length: {full_song.duration_seconds}")
         logging.info(f"Generating clips of lengths (in seconds): {','.join(map(str, self.clip_durations))}")
         for l in self.clip_durations:
             clip = full_song[:l*1000]
             clip.export(os.path.join(self.song_dir, f"clip_{l:d}s.mp3"), format='mp3')
+
+    def prepare_song(self, song):
+        self.download_song(song)
+        self.generate_clips()
