@@ -4,8 +4,6 @@ import json
 from ytmusicapi import YTMusic
 
 logging.basicConfig(level=logging.INFO)
-# Authenticate
-ytmusic = YTMusic('headers_auth.json')
 
 class Library:
     def __init__(self) -> None:
@@ -23,6 +21,8 @@ class Library:
 
     def update_cache(self) -> None:
         logging.info("Updating cache from YTMusic")
+        # Authenticate
+        ytmusic = YTMusic('headers_auth.json')
         self.songs = ytmusic.get_library_songs(limit=999999)
         with open(self.cache, 'w') as cache_fh:
             for song in self.songs:
