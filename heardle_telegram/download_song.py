@@ -5,6 +5,22 @@ from pydub import AudioSegment
 
 logging.basicConfig(level=logging.INFO)
 
+class Song:
+    def __init__(self, song_info: dict):
+        self.title = song_info['title']
+        self.artist = song_info['artists'][0]['name']
+        self.id = song_info['videoId']
+        self.url = f"https://music.youtube.com/watch?v={self.id}"
+
+    def get_url(self) -> str:
+        return self.url
+
+    def __str__(self):
+        return f"{self.title} - {self.artist}"
+
+    def __repr__(self):
+        return f"Song: {self.title}; Artist: {self.artist}; ID: {self.id}"
+
 class ClipGenerator:
     song_dir = 'song_clips'
     full_song = os.path.join(song_dir, 'song_full.mp3')
