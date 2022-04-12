@@ -1,2 +1,3 @@
 ytmusicapi
 youtube-dl
+pydub

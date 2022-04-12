@@ -32,4 +32,4 @@ clip_generator = ClipGenerator()
 # Download the song
 clip_generator.download_song(song)
 # Generate short clips
-# clip_generator.generate_clips(song)
+clip_generator.generate_clips(song)
