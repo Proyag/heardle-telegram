@@ -3,7 +3,7 @@ Like [Heardle](https://www.heardle.app), but with a customised list of songs and
 
 ## Setup
 ```bash
-conda create -n heardle-telegram python=3.9
+conda create -n heardle-telegram python=3.10
 sudo apt install ffmpeg
 pip install -r requirements.txt
 ```
