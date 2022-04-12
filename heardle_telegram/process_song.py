@@ -3,8 +3,6 @@ import logging
 import youtube_dl
 from pydub import AudioSegment
 
-logging.basicConfig(level=logging.INFO)
-
 class Song:
     def __init__(self, song_info: dict):
         self.title = song_info['title']

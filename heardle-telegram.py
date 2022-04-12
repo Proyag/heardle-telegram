@@ -1,3 +1,6 @@
+import logging
+logging.basicConfig(format='[%(levelname)s] %(message)s', level=logging.INFO)
+
 from heardle_telegram.ytmusic_library import Library
 from heardle_telegram.process_song import ClipGenerator
 

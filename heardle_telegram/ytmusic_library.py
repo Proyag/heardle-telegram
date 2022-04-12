@@ -5,8 +5,6 @@ import random
 from ytmusicapi import YTMusic
 from .process_song import Song
 
-logging.basicConfig(level=logging.INFO)
-
 class Library:
     def __init__(self) -> None:
         self.songs = []
