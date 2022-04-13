@@ -11,7 +11,7 @@ def start(update: Update, context: CallbackContext) -> None:
     """Start a game when the command /start is issued."""
     logging.info("/start command received")
     user = update.effective_user
-    if game.check_user_played(user['id']):
+    if game.check_user_started(user['id']):
         logging.info(f"User {user['id']} already started")
         update.message.reply_markdown_v2(
             f"User {user.mention_markdown_v2()} has already started this game"
@@ -23,7 +23,10 @@ def start(update: Update, context: CallbackContext) -> None:
             f"Started game for {user.mention_markdown_v2()}"
         )
         # Start with the first (shortest) clip
-        update.message.reply_audio(open(game.get_clip_file(0), 'rb'), caption="Clip #1")
+        update.message.reply_audio(
+            open(game.get_clip_file(0), 'rb'),
+            caption="Clip #1"
+        )
     
 def help(update: Update, context: CallbackContext) -> None:
     """Help message"""
@@ -46,6 +49,18 @@ def status(update: Update, context: CallbackContext) -> None:
 def pass_move(update: Update, context: CallbackContext) -> None:
     """Pass and get next clip"""
     logging.info("/pass command received")
+    user = update.effective_user
+    if not game.check_user_started(user['id']):
+        logging.info(f"User {user['id']} has not started this game")
+        update.message.reply_markdown_v2(
+            f"User {user.mention_markdown_v2()} has not started this game"
+        )
+    user_game = game.get_user_game(user['id'])
+    user_game.pass_move()
+    update.message.reply_audio(
+        open(game.get_clip_file(user_game.get_guesses()), 'rb'),
+        caption=f"Clip #{user_game.get_guesses() + 1}"
+    )
 
 def guess(update: Update, context: CallbackContext) -> None:
     """Take a guess"""
