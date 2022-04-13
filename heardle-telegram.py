@@ -36,7 +36,7 @@ def help(update: Update, context: CallbackContext) -> None:
         "/start: Start playing current game\n"
         "/status: Check whether game is running\n"
         "/pass: Pass move and get the next clip\n"
-        "/guess: Take a guess\n"
+        "/guess: Take a guess in the format Artist;Song\n"
         "/giveup: Give up and see the answer\n"
     )
 
@@ -110,8 +110,6 @@ def main() -> None:
     # Start the Bot
     updater.start_polling()
     updater.idle()
-
-    logging.info("New game is up")
 
 if __name__ == '__main__':
     main()
