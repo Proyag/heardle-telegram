@@ -5,10 +5,23 @@ from telegram import Update
 from telegram.ext import Updater, CommandHandler, CallbackContext
 from heardle_telegram.ytmusic_library import Library
 from heardle_telegram.process_song import ClipGenerator
+from heardle_telegram.game import Game
 
 def start(update: Update, context: CallbackContext) -> None:
     """Start a game when the command /start is issued."""
     logging.info("/start command received")
+    user = update.effective_user
+    if game.check_user_played(user['id']):
+        logging.info(f"User {user['id']} already started")
+        update.message.reply_markdown_v2(
+            f"User {user.mention_markdown_v2()} has already started this game"
+        )
+    else:
+        game.new_user_game(user['id'])
+        logging.info(f"Started game {hash(game)} for user {user['id']}")
+        update.message.reply_markdown_v2(
+            f"Started game for {user.mention_markdown_v2()}"
+        )
     
 def help(update: Update, context: CallbackContext) -> None:
     """Help message"""
@@ -26,7 +39,7 @@ def help(update: Update, context: CallbackContext) -> None:
 def status(update: Update, context: CallbackContext) -> None:
     """Check whether game is running and current game ID"""
     logging.info("/status command received")
-    update.message.reply_text("Game running")
+    update.message.reply_text(f"Game {hash(game)} running")
 
 def pass_move(update: Update, context: CallbackContext) -> None:
     """Pass and get next clip"""
@@ -43,8 +56,13 @@ def give_up(update: Update, context: CallbackContext) -> None:
 def main() -> None:
     # Pick a random song
     song = Library().get_random_song()
+    # TODO: For debugging; remove
+    # song = Library().get_song_list()[667]
     # Download the song and generate clips
     clip_generator = ClipGenerator().prepare_song(song)
+
+    global game
+    game = Game(song)
 
     # Configure Telegram API
     telegram_config = json.load(open('telegram_config.json'))
