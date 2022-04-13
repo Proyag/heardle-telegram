@@ -6,10 +6,13 @@ from ytmusicapi import YTMusic
 from .process_song import Song
 
 class Library:
-    def __init__(self) -> None:
+    def __init__(self, force_update=False) -> None:
         self.songs = []
         self.cache = 'library_cache'
-        self.check_update_cache()
+        if not force_update:
+            self.check_update_cache()
+        else:
+            self.update_cache()
 
     def check_update_cache(self) -> None:
         """Update cache if it's non-existent/empty and load it"""
