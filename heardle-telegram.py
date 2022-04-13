@@ -55,6 +55,7 @@ def pass_move(update: Update, context: CallbackContext) -> None:
         update.message.reply_markdown_v2(
             f"User {user.mention_markdown_v2()} has not started this game"
         )
+        return
     user_game = game.get_user_game(user['id'])
     user_game.pass_move()
     update.message.reply_audio(
@@ -69,6 +70,15 @@ def guess(update: Update, context: CallbackContext) -> None:
 def give_up(update: Update, context: CallbackContext) -> None:
     """Give up and show the answer"""
     logging.info("/giveup command received")
+    user = update.effective_user
+    if not game.check_user_started(user['id']):
+        logging.info(f"User {user['id']} has not started this game")
+        update.message.reply_markdown_v2(
+            f"User {user.mention_markdown_v2()} has not started this game"
+        )
+        return
+    update.message.reply_text(f"The answer is: {game.get_song_answer()}")
+
 
 def main() -> None:
     # Pick a random song

@@ -51,3 +51,7 @@ class Game:
     def get_user_game(self, user_id) -> UserGame:
         """Get a specific user's game"""
         return self.user_games[user_id]
+
+    def get_song_answer(self) -> str:
+        """Reveal the answer"""
+        return str(self.song)
