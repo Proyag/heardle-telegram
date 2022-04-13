@@ -65,9 +65,9 @@ def main() -> None:
     game = Game(song)
 
     # Configure Telegram API
-    telegram_config = json.load(open('telegram_config.json'))
+    telegram_api_token = open('telegram_api_token').read().strip()
 
-    updater = Updater(telegram_config['api_token'])
+    updater = Updater(token=telegram_api_token)
     dispatcher = updater.dispatcher
 
     # Command handlers
