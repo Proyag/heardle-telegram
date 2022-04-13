@@ -12,6 +12,7 @@ pip install -r requirements.txt
 
 ### Configure `ytmusicapi` headers
 Then set up ytmusicapi headers according to https://ytmusicapi.readthedocs.io/en/latest/setup.html.
+#### Step 1: Get header info
 * Go to https://music.youtube.com and ensure you are logged in
 * Find an authenticated POST request. The simplest way is to filter by /browse using the search bar of the developer tools. If you don’t see the request, try scrolling down a bit or clicking on the library button in the top bar.
 <details><summary>Firefox </summary>
@@ -26,6 +27,13 @@ Then set up ytmusicapi headers according to https://ytmusicapi.readthedocs.io/en
 * Verify that the request looks like this: **Status** 200, **Type** xhr, **Name** `browse?...`
 * Click on the Name of any matching request. In the “Headers” tab, scroll to the section “Request headers” and copy everything starting from “accept: */*” to the end of the section
 </details>
+
+#### Step 2: Create file with these credentials
+```python
+from ytmusicapi import YTMusic
+YTMusic.setup(filepath="headers_auth.json")
+```
+Then paste what you got in the previous step, and press `Ctrl+D`.
 
 ### Configure Telegram Bot API
 Next, create a file called `telegram_api_token` with only your telegram API token for this bot pasted in it.
