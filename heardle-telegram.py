@@ -66,6 +66,10 @@ def guess(update: Update, context: CallbackContext) -> None:
     """Take a guess"""
     logging.info("/guess command received")
 
+def escape_answer_for_markdown(answer) -> tuple[str, str]:
+    """Escape characters in answer for markdown response"""
+    return (answer[0].replace('-', '\-').replace('(', '\(').replace(')', '\)').replace('.', '\.'), answer[1])
+
 def give_up(update: Update, context: CallbackContext) -> None:
     """Give up and show the answer"""
     logging.info("/giveup command received")
@@ -76,9 +80,9 @@ def give_up(update: Update, context: CallbackContext) -> None:
             f"User {user.mention_markdown_v2()} has not started this game"
         )
         return
-    answer = game.get_song_answer()
+    answer = escape_answer_for_markdown(game.get_song_answer())
     update.message.reply_markdown_v2(
-        f"The answer is: [{answer[0]}]({answer[1]})".replace('-', '\-'),
+        f"The answer is: [{answer[0]}]({answer[1]})",
         disable_web_page_preview=True
     )
 
