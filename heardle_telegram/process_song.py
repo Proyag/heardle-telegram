@@ -11,6 +11,7 @@ class Song:
         self.url = f"https://music.youtube.com/watch?v={self.id}"
 
     def get_url(self) -> str:
+        """Get Youtube Music URL for song"""
         return self.url
 
     def __str__(self):
@@ -46,11 +47,12 @@ class ClipGenerator:
             os.mkdir(self.song_dir)
 
     def download_song(self, song):
-        # Download
+        """Download a song from Youtube Music"""
         with youtube_dl.YoutubeDL(self.dl_opts) as ydl:
             ydl.download([song.get_url()])
 
     def generate_clips(self):
+        """Generate shorter clips from the full song"""
         full_song = AudioSegment.from_mp3(self.full_song)
         logging.info(f"Full song length: {full_song.duration_seconds}")
         logging.info(f"Generating clips of lengths (in seconds): {','.join(map(str, self.clip_durations))}")
@@ -59,5 +61,6 @@ class ClipGenerator:
             clip.export(os.path.join(self.song_dir, f"clip_{l:d}s.mp3"), format='mp3')
 
     def prepare_song(self, song):
+        """Download song and generate clips to prepare a new game"""
         self.download_song(song)
         self.generate_clips()
