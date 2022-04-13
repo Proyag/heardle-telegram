@@ -29,7 +29,6 @@ Then set up ytmusicapi headers according to https://ytmusicapi.readthedocs.io/en
 
 ### Configure Telegram Bot API
 Next, create a file called `telegram_api_token` with only your telegram API token for this bot pasted in it.
-```
 
 ## Run
 Run a game with
