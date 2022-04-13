@@ -3,9 +3,10 @@ from time import time
 
 class Game:
     """One instance of a whole game, i.e. one song"""
-    def __init__(self, song) -> None:
+    def __init__(self, song, clip_generator) -> None:
         self.start_time = time()
         self.song = song
+        self.clip_generator = clip_generator
         self.user_games: dict[int, UserGame] = {}
         logging.info(f"Launching game at {self.start_time}")
 
@@ -17,7 +18,12 @@ class Game:
         return user_id in self.user_games.keys()
 
     def new_user_game(self, user_id) -> None:
+        """Create a new user game"""
         self.user_games[user_id] = UserGame(user_id, self.__hash__())
+
+    def get_clip_file(self, clip_num) -> str:
+        """Get a specific clip of the song"""
+        return self.clip_generator.get_clip_file(clip_num)
 
 class UserGame:
     """One user playing one game"""

@@ -64,3 +64,10 @@ class ClipGenerator:
         """Download song and generate clips to prepare a new game"""
         self.download_song(song)
         self.generate_clips()
+
+    def get_clip_file(self, clip_num):
+        """Get a specific clip of the song"""
+        if clip_num < len(self.clip_durations):
+            return os.path.join(self.song_dir, f"clip_{self.clip_durations[clip_num]:d}s.mp3")
+        else:
+            return self.full_song

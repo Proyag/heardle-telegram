@@ -22,6 +22,8 @@ def start(update: Update, context: CallbackContext) -> None:
         update.message.reply_markdown_v2(
             f"Started game for {user.mention_markdown_v2()}"
         )
+        # Start with the first (shortest) clip
+        update.message.reply_audio(open(game.get_clip_file(0), 'rb'), caption="Clip #1")
     
 def help(update: Update, context: CallbackContext) -> None:
     """Help message"""
@@ -56,13 +58,12 @@ def give_up(update: Update, context: CallbackContext) -> None:
 def main() -> None:
     # Pick a random song
     song = Library().get_random_song()
-    # TODO: For debugging; remove
-    # song = Library().get_song_list()[667]
     # Download the song and generate clips
-    clip_generator = ClipGenerator().prepare_song(song)
+    clip_generator = ClipGenerator()
+    clip_generator.prepare_song(song)
 
     global game
-    game = Game(song)
+    game = Game(song, clip_generator)
 
     # Configure Telegram API
     telegram_api_token = open('telegram_api_token').read().strip()
