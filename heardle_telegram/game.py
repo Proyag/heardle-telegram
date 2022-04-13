@@ -52,6 +52,6 @@ class Game:
         """Get a specific user's game"""
         return self.user_games[user_id]
 
-    def get_song_answer(self) -> str:
+    def get_song_answer(self) -> tuple[str, str]:
         """Reveal the answer"""
-        return str(self.song)
+        return (str(self.song), self.song.get_url())

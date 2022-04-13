@@ -1,6 +1,5 @@
 import logging
 logging.basicConfig(format='[%(levelname)s] %(message)s', level=logging.INFO)
-import json
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, CallbackContext
 from heardle_telegram.ytmusic_library import Library
@@ -77,7 +76,11 @@ def give_up(update: Update, context: CallbackContext) -> None:
             f"User {user.mention_markdown_v2()} has not started this game"
         )
         return
-    update.message.reply_text(f"The answer is: {game.get_song_answer()}")
+    answer = game.get_song_answer()
+    update.message.reply_markdown_v2(
+        f"The answer is: [{answer[0]}]({answer[1]})".replace('-', '\-'),
+        disable_web_page_preview=True
+    )
 
 
 def main() -> None:
