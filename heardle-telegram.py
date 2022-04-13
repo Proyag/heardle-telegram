@@ -15,9 +15,12 @@ def help(update: Update, context: CallbackContext) -> None:
     logging.info("/help command received")
     update.message.reply_text(
         "Heardle telegram bot\n"
+        "/help: Get this help message\n"
         "/start: Start playing current game\n"
         "/status: Check whether game is running\n"
-        "/help: Get this help message\n"
+        "/pass: Pass move and get the next clip\n"
+        "/guess: Take a guess\n"
+        "/giveup: Give up and see the answer\n"
     )
 
 def status(update: Update, context: CallbackContext) -> None:
@@ -25,6 +28,17 @@ def status(update: Update, context: CallbackContext) -> None:
     logging.info("/status command received")
     update.message.reply_text("Game running")
 
+def pass_move(update: Update, context: CallbackContext) -> None:
+    """Pass and get next clip"""
+    logging.info("/pass command received")
+
+def guess(update: Update, context: CallbackContext) -> None:
+    """Take a guess"""
+    logging.info("/guess command received")
+
+def give_up(update: Update, context: CallbackContext) -> None:
+    """Give up and show the answer"""
+    logging.info("/giveup command received")
 
 def main() -> None:
     # Pick a random song
@@ -35,15 +49,16 @@ def main() -> None:
     # Configure Telegram API
     telegram_config = json.load(open('telegram_config.json'))
 
-    # https://github.com/python-telegram-bot/python-telegram-bot/blob/master/examples/echobot.py
     updater = Updater(telegram_config['api_token'])
-    # Get the dispatcher to register handlers
     dispatcher = updater.dispatcher
 
     # Command handlers
     dispatcher.add_handler(CommandHandler("start", start))
     dispatcher.add_handler(CommandHandler("help", help))
     dispatcher.add_handler(CommandHandler("status", status))
+    dispatcher.add_handler(CommandHandler("pass", pass_move))
+    dispatcher.add_handler(CommandHandler("guess", guess))
+    dispatcher.add_handler(CommandHandler("giveup", give_up))
 
     # Start the Bot
     updater.start_polling()
