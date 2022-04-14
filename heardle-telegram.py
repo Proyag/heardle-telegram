@@ -65,11 +65,7 @@ def increment_move(update: Update, game: Game, user_game: UserGame) -> None:
             open(game.get_clip_file(user_game.get_guesses()), 'rb'),
             caption="Full song"
         )
-        answer = escape_answer_for_markdown(game.get_song_answer())
-        update.message.reply_markdown_v2(
-            f"The answer is: [{answer[0]}]({answer[1]})",
-            disable_web_page_preview=True
-        )
+        send_answer(update, game)
 
 def not_started_message(update: Update) -> None:
     """Reply that player has not started"""
@@ -114,6 +110,7 @@ def guess(update: Update, context: CallbackContext) -> None:
         update.message.reply_markdown_v2(
             f"{user.mention_markdown_v2()} finished in {user_game.get_guesses() + 1} moves\!"
         )
+        send_answer(update, game)
     else:
         if game.check_guess(guess_str)[0]:
             update.message.reply_markdown_v2(
@@ -133,6 +130,14 @@ def escape_answer_for_markdown(answer) -> tuple[str, str]:
     """Escape characters in answer for markdown response"""
     return (answer[0].replace('-', '\-').replace('(', '\(').replace(')', '\)').replace('.', '\.'), answer[1])
 
+def send_answer(update: Update, game: Game) -> None:
+    """Sends the final answer"""
+    answer = escape_answer_for_markdown(game.get_song_answer())
+    update.message.reply_markdown_v2(
+        f"The answer is: [{answer[0]}]({answer[1]})",
+        disable_web_page_preview=True
+    )
+
 def give_up(update: Update, context: CallbackContext) -> None:
     """Give up and show the answer"""
     logging.info("/giveup command received")
@@ -147,11 +152,7 @@ def give_up(update: Update, context: CallbackContext) -> None:
         )
     else:
         user_game.set_defeat()
-    answer = escape_answer_for_markdown(game.get_song_answer())
-    update.message.reply_markdown_v2(
-        f"The answer is: [{answer[0]}]({answer[1]})",
-        disable_web_page_preview=True
-    )
+    send_answer(update, game)
 
 
 def main() -> None:
