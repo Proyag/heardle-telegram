@@ -59,7 +59,7 @@ class Game:
         """Create a new user game"""
         self.user_games[user_id] = UserGame(user_id, self.__hash__())
 
-    def get_clip_file(self, clip_num) -> str:
+    def get_clip_file(self, clip_num=None) -> str:
         """Get a specific clip of the song"""
         return self.clip_generator.get_clip_file(clip_num)
 

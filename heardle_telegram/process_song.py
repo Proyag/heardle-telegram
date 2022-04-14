@@ -73,9 +73,9 @@ class ClipGenerator:
         self.download_song(song)
         self.generate_clips()
 
-    def get_clip_file(self, clip_num):
+    def get_clip_file(self, clip_num=None):
         """Get a specific clip of the song"""
-        if clip_num < len(self.clip_durations):
+        if clip_num is not None and clip_num < len(self.clip_durations):
             return os.path.join(self.song_dir, f"clip_{self.clip_durations[clip_num]:d}s.mp3")
         else:
             return self.full_song
