@@ -2,8 +2,21 @@ from ast import Call
 import logging
 from uuid import uuid4
 logging.basicConfig(format='[%(levelname)s] %(message)s', level=logging.INFO)
-from telegram import InputTextMessageContent, Update, InlineQueryResultArticle
-from telegram.ext import Updater, CommandHandler, CallbackContext, InlineQueryHandler
+from telegram import (
+    CallbackQuery,
+    InputTextMessageContent,
+    Update,
+    InlineQueryResultArticle,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup
+)
+from telegram.ext import (
+    Updater,
+    CommandHandler,
+    CallbackContext,
+    InlineQueryHandler,
+    CallbackQueryHandler
+)
 from heardle_telegram.ytmusic_library import Library
 from heardle_telegram.process_song import ClipGenerator
 from heardle_telegram.game import Game, UserGame
@@ -28,6 +41,7 @@ def start(update: Update, context: CallbackContext) -> None:
             open(game.get_clip_file(0), 'rb'),
             caption="Clip #1"
         )
+    show_options(update)
     
 def help(update: Update, context: CallbackContext) -> None:
     """Help message"""
@@ -37,11 +51,7 @@ def help(update: Update, context: CallbackContext) -> None:
         "/help: Get this help message\n"
         "/start: Start playing current game\n"
         "/status: Check whether game is running\n"
-        "/pass: Pass move and get the next clip\n"
-        "/giveup: Give up and see the answer\n"
-        "/guess: Take a guess in the format Artist; Song.\n"
-        "(Start by tagging the bot to get song suggestions while guessing)\n"
-        "For example: @CustomHeardleBot /guess John Mayer; Neon\n"
+        "Play using the chat buttons"
     )
 
 def status(update: Update, context: CallbackContext) -> None:
@@ -49,9 +59,31 @@ def status(update: Update, context: CallbackContext) -> None:
     logging.info("/status command received")
     update.message.reply_text(f"Game {hash(game)} running")
 
-def increment_move(update: Update, game: Game, user_game: UserGame) -> None:
+def show_options(update: Update) -> None:
+    """Show options as an inline keyboard"""
+    keyboard = [
+        [
+            InlineKeyboardButton("Pass", callback_data="/pass"),
+            InlineKeyboardButton("Give up", callback_data="/giveup")
+        ],
+        [
+            InlineKeyboardButton("Guess", switch_inline_query_current_chat="/guess ")
+        ]
+    ]
+    update.message.reply_text("Choose an option", reply_markup=InlineKeyboardMarkup(keyboard))
+
+def keyboard_callback(update: Update, context: CallbackContext) -> None:
+    if update.callback_query.data == "/pass":
+        pass_move(update.callback_query, context)
+    elif update.callback_query.data == "/giveup":
+        give_up(update.callback_query, context)
+
+def increment_move(update: CallbackQuery|Update, game: Game, user_game: UserGame) -> None:
     """Register a passed move when player passes or guesses wrong"""
-    user = update.effective_user
+    if hasattr(update, 'effective_user'):
+        user = update.effective_user
+    else:
+        user = update.from_user
     user_game.pass_move()
     if user_game.get_guesses() < 6:
         # Send next clip
@@ -59,6 +91,7 @@ def increment_move(update: Update, game: Game, user_game: UserGame) -> None:
             open(game.get_clip_file(user_game.get_guesses()), 'rb'),
             caption=f"Clip #{user_game.get_guesses() + 1}"
         )
+        show_options(update)
     else:
         # Game over
         user_game.set_defeat()
@@ -69,16 +102,16 @@ def increment_move(update: Update, game: Game, user_game: UserGame) -> None:
 
 def not_started_message(update: Update) -> None:
     """Reply that player has not started"""
-    user = update.effective_user
+    user = update.from_user
     logging.info(f"{user['id']} has not started this game")
     update.message.reply_markdown_v2(
         f"{user.mention_markdown_v2()} has not started this game"
     )
 
-def pass_move(update: Update, context: CallbackContext) -> None:
+def pass_move(update: CallbackQuery, context: CallbackContext) -> None:
     """Pass and get next clip"""
     logging.info("/pass command received")
-    user = update.effective_user
+    user = update.from_user
     if not game.check_user_started(user['id']):
         not_started_message(update)
         return
@@ -142,10 +175,10 @@ def send_answer(update: Update, game: Game) -> None:
         caption="Full song"
     )
 
-def give_up(update: Update, context: CallbackContext) -> None:
+def give_up(update: CallbackQuery, context: CallbackContext) -> None:
     """Give up and show the answer"""
     logging.info("/giveup command received")
-    user = update.effective_user
+    user = update.from_user
     if not game.check_user_started(user['id']):
         not_started_message(update)
         return
@@ -201,10 +234,9 @@ def main() -> None:
     dispatcher.add_handler(CommandHandler("start", start))
     dispatcher.add_handler(CommandHandler("help", help))
     dispatcher.add_handler(CommandHandler("status", status))
-    dispatcher.add_handler(CommandHandler("pass", pass_move))
     dispatcher.add_handler(CommandHandler("guess", guess))
-    dispatcher.add_handler(CommandHandler("giveup", give_up))
     dispatcher.add_handler(InlineQueryHandler(suggest_songs, pattern='\/guess .+'))
+    dispatcher.add_handler(CallbackQueryHandler(keyboard_callback))
 
     # Start the Bot
     updater.start_polling()
