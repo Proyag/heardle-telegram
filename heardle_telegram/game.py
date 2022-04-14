@@ -80,6 +80,6 @@ class Game:
             # Not in right format
             return (False, False)
         artist, title = guess.split(';', 1)
-        artist = artist.strip()
-        title = title.strip()
-        return (artist == self.song.get_artist(), title == self.song.get_title())
+        artist = artist.strip().lower()
+        title = title.strip().lower()
+        return (artist == self.song.get_artist().lower(), title == self.song.get_title().lower())

@@ -38,9 +38,10 @@ def help(update: Update, context: CallbackContext) -> None:
         "/start: Start playing current game\n"
         "/status: Check whether game is running\n"
         "/pass: Pass move and get the next clip\n"
-        "/guess: Take a guess in the format Artist; Song. "
-        "(Start by tagging the bot to get song suggestions while guessing)\n"
         "/giveup: Give up and see the answer\n"
+        "/guess: Take a guess in the format Artist; Song.\n"
+        "(Start by tagging the bot to get song suggestions while guessing)\n"
+        "For example: @CustomHeardleBot /guess John Mayer; Neon\n"
     )
 
 def status(update: Update, context: CallbackContext) -> None:
@@ -167,7 +168,6 @@ def suggest_songs(update: Update, context: CallbackContext) -> None:
 
     results = []
     for suggestion in library.get_song_suggestions(query):
-        print(suggestion)
         results.append(
             InlineQueryResultArticle(
                 id=str(uuid4()),
