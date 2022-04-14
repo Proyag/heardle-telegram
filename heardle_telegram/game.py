@@ -7,7 +7,8 @@ class UserGame:
         self.user_id = user_id
         self.game_id = game_id
         self.guesses = 0
-        self.done = False
+        self.defeat = False
+        self.success = False
 
     def __hash__(self):
         return hash(str(self.user_id) + str(self.game_id))
@@ -23,6 +24,20 @@ class UserGame:
     def get_guesses(self) -> int:
         """Get the number of guesses taken by player"""
         return self.guesses
+
+    def set_defeat(self) -> None:
+        """Set user game as over"""
+        logging.info(f"Setting game over for user {self.user_id}")
+        self.defeat = True
+
+    def set_success(self) -> None:
+        """Set user game as won"""
+        logging.info(f"User {self.user_id} won the game")
+        self.success = True
+
+    def check_done(self) -> bool:
+        """Check if user game is finished"""
+        return self.defeat or self.success
 
 class Game:
     """One instance of a whole game, i.e. one song"""

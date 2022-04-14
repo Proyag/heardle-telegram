@@ -11,9 +11,9 @@ def start(update: Update, context: CallbackContext) -> None:
     logging.info("/start command received")
     user = update.effective_user
     if game.check_user_started(user['id']):
-        logging.info(f"User {user['id']} already started")
+        logging.info(f"{user['id']} already started")
         update.message.reply_markdown_v2(
-            f"User {user.mention_markdown_v2()} has already started this game"
+            f"{user.mention_markdown_v2()} has already started this game"
         )
     else:
         game.new_user_game(user['id'])
@@ -50,21 +50,60 @@ def pass_move(update: Update, context: CallbackContext) -> None:
     logging.info("/pass command received")
     user = update.effective_user
     if not game.check_user_started(user['id']):
-        logging.info(f"User {user['id']} has not started this game")
+        logging.info(f"{user['id']} has not started this game")
         update.message.reply_markdown_v2(
-            f"User {user.mention_markdown_v2()} has not started this game"
+            f"{user.mention_markdown_v2()} has not started this game"
         )
         return
     user_game = game.get_user_game(user['id'])
+    if user_game.check_done():
+        update.message.reply_markdown_v2(
+            f"Game already finished for {user.mention_markdown_v2()}"
+        )
+        return
     user_game.pass_move()
-    update.message.reply_audio(
-        open(game.get_clip_file(user_game.get_guesses()), 'rb'),
-        caption=f"Clip #{user_game.get_guesses() + 1}"
-    )
+    if user_game.get_guesses() < 6:
+        # Send next clip
+        update.message.reply_audio(
+            open(game.get_clip_file(user_game.get_guesses()), 'rb'),
+            caption=f"Clip #{user_game.get_guesses() + 1}"
+        )
+    else:
+        # Game over
+        user_game.set_defeat()
+        update.message.reply_markdown_v2(
+            f"{user.mention_markdown_v2()} lost the game"
+        )
+        update.message.reply_audio(
+            open(game.get_clip_file(user_game.get_guesses()), 'rb'),
+            caption="Full song"
+        )
+        answer = escape_answer_for_markdown(game.get_song_answer())
+        update.message.reply_markdown_v2(
+            f"The answer is: [{answer[0]}]({answer[1]})",
+            disable_web_page_preview=True
+        )
 
 def guess(update: Update, context: CallbackContext) -> None:
     """Take a guess"""
     logging.info("/guess command received")
+    user = update.effective_user
+    if not game.check_user_started(user['id']):
+        logging.info(f"{user['id']} has not started this game")
+        update.message.reply_markdown_v2(
+            f"{user.mention_markdown_v2()} has not started this game"
+        )
+        return
+    user_game = game.get_user_game(user['id'])
+    if user_game.check_done():
+        update.message.reply_markdown_v2(
+            f"Game already finished for {user.mention_markdown_v2()}"
+        )
+        return
+    user_game.set_success()
+    update.message.reply_markdown_v2(
+        f"{user.mention_markdown_v2()} finished in {user_game.get_guesses() + 1} moves\!"
+    )
 
 def escape_answer_for_markdown(answer) -> tuple[str, str]:
     """Escape characters in answer for markdown response"""
@@ -75,11 +114,18 @@ def give_up(update: Update, context: CallbackContext) -> None:
     logging.info("/giveup command received")
     user = update.effective_user
     if not game.check_user_started(user['id']):
-        logging.info(f"User {user['id']} has not started this game")
+        logging.info(f"{user['id']} has not started this game")
         update.message.reply_markdown_v2(
-            f"User {user.mention_markdown_v2()} has not started this game"
+            f"{user.mention_markdown_v2()} has not started this game"
         )
         return
+    user_game = game.get_user_game(user['id'])
+    if user_game.check_done():
+        update.message.reply_markdown_v2(
+            f"Game already finished for {user.mention_markdown_v2()}"
+        )
+    else:
+        user_game.set_defeat()
     answer = escape_answer_for_markdown(game.get_song_answer())
     update.message.reply_markdown_v2(
         f"The answer is: [{answer[0]}]({answer[1]})",
