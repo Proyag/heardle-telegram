@@ -70,3 +70,16 @@ class Game:
     def get_song_answer(self) -> tuple[str, str]:
         """Reveal the answer"""
         return (str(self.song), self.song.get_url())
+
+    def check_guess(self, guess) -> tuple[bool, bool]:
+        """
+        Check if a guess in the format Artist; Title matches
+        and return a pair of booleans for artist and title
+        """
+        if ';' not in guess:
+            # Not in right format
+            return (False, False)
+        artist, title = guess.split(';', 1)
+        artist = artist.strip()
+        title = title.strip()
+        return (artist == self.song.get_artist(), title == self.song.get_title())

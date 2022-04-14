@@ -14,8 +14,16 @@ class Song:
         """Get Youtube Music URL for song"""
         return self.url
 
+    def get_artist(self) -> str:
+        """Get the artist"""
+        return self.artist
+
+    def get_title(self) -> str:
+        """Get the song title"""
+        return self.title
+
     def __str__(self):
-        return f"{self.title} - {self.artist}"
+        return f"{self.artist}; {self.title}"
 
     def __repr__(self):
         return f"Song: {self.title}; Artist: {self.artist}; ID: {self.id}"
