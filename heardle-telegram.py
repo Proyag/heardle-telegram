@@ -26,10 +26,16 @@ def start(update: Update, context: CallbackContext) -> None:
     logging.info("/start command received")
     user = update.effective_user
     if game.check_user_started(user['id']):
-        logging.info(f"{user['id']} already started")
-        update.message.reply_markdown_v2(
-            f"{user.mention_markdown_v2()} has already started this game"
-        )
+        if game.get_user_game(user['id']).check_done():
+            update.message.reply_markdown_v2(
+                f"Game already finished for {user.mention_markdown_v2()}"
+            )
+            return
+        else:
+            logging.info(f"{user['id']} already started")
+            update.message.reply_markdown_v2(
+                f"{user.mention_markdown_v2()} has already started this game"
+            )
     else:
         game.new_user_game(user['id'])
         logging.info(f"Started game {hash(game)} for user {user['id']}")
