@@ -161,7 +161,7 @@ def guess(update: Update, context: CallbackContext) -> None:
 
 def escape_answer_for_markdown(answer) -> tuple[str, str]:
     """Escape characters in answer for markdown response"""
-    return (answer[0].replace('-', '\-').replace('(', '\(').replace(')', '\)').replace('.', '\.'), answer[1])
+    return (answer[0].replace('-', '\-').replace('(', '\(').replace(')', '\)').replace('.', '\.').replace(';', ' \-'), answer[1])
 
 def send_answer(update: Update, game: Game) -> None:
     """Sends the final answer"""
@@ -204,7 +204,7 @@ def suggest_songs(update: Update, context: CallbackContext) -> None:
         results.append(
             InlineQueryResultArticle(
                 id=str(uuid4()),
-                title=suggestion,
+                title=suggestion.replace(';', ' -'),
                 input_message_content=InputTextMessageContent(f"/guess {suggestion}")
             )
         )
