@@ -9,14 +9,13 @@ class Library:
     def __init__(self, force_update=False) -> None:
         self.songs = []
         self.cache = 'library_cache'
-        if not force_update:
-            self.check_update_cache()
-        else:
+        if force_update:
             self.update_cache()
+        else:
+            self.check_update_cache()
 
     def check_update_cache(self) -> None:
         """Update cache if it's non-existent/empty and load it"""
-        # TODO: Maybe refresh if the file is old? But can't do that if we want to combine libraries
         if not os.path.exists(self.cache) or os.stat(self.cache).st_size == 0:
             self.update_cache()
         self.read_cache()
