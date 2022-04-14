@@ -49,3 +49,14 @@ class Library:
         song = random.choice(self.songs)
         logging.info(f"Chosen song: {song}")
         return song
+
+    def get_song_suggestions(self, substr, max_results=10):
+        """Find songs (artist + title) matching a substring"""
+        n_results = 0
+        logging.info(f"Suggesting songs matching {substr}")
+        for song in self.songs:
+            if substr in str(song):
+                n_results += 1
+                yield str(song)
+                if n_results >= max_results:
+                    break

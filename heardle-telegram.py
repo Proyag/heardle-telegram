@@ -1,7 +1,9 @@
+from ast import Call
 import logging
+from uuid import uuid4
 logging.basicConfig(format='[%(levelname)s] %(message)s', level=logging.INFO)
-from telegram import Update
-from telegram.ext import Updater, CommandHandler, CallbackContext
+from telegram import InputTextMessageContent, Update, InlineQueryResultArticle
+from telegram.ext import Updater, CommandHandler, CallbackContext, InlineQueryHandler
 from heardle_telegram.ytmusic_library import Library
 from heardle_telegram.process_song import ClipGenerator
 from heardle_telegram.game import Game, UserGame
@@ -154,10 +156,33 @@ def give_up(update: Update, context: CallbackContext) -> None:
         user_game.set_defeat()
     send_answer(update, game)
 
+def suggest_songs(update: Update, context: CallbackContext) -> None:
+    """Autocomplete suggestions for guesses"""
+    # Strip the first 7 letters: "/guess "
+    query = update.inline_query.query[7:]
+    
+    if query == "":
+        return
+
+    results = []
+    for suggestion in library.get_song_suggestions(query):
+        print(suggestion)
+        results.append(
+            InlineQueryResultArticle(
+                id=str(uuid4()),
+                title=suggestion,
+                input_message_content=InputTextMessageContent(f"/guess {suggestion}")
+            )
+        )
+
+    update.inline_query.answer(results)
+
 
 def main() -> None:
+    global library
+    library = Library()
     # Pick a random song
-    song = Library().get_random_song()
+    song = library.get_random_song()
     # Download the song and generate clips
     clip_generator = ClipGenerator()
     clip_generator.prepare_song(song)
@@ -178,6 +203,7 @@ def main() -> None:
     dispatcher.add_handler(CommandHandler("pass", pass_move))
     dispatcher.add_handler(CommandHandler("guess", guess))
     dispatcher.add_handler(CommandHandler("giveup", give_up))
+    dispatcher.add_handler(InlineQueryHandler(suggest_songs, pattern='\/guess .+'))
 
     # Start the Bot
     updater.start_polling()
