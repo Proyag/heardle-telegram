@@ -201,7 +201,7 @@ def suggest_songs(update: Update, context: CallbackContext) -> None:
             )
         )
 
-    update.inline_query.answer(results)
+    update.inline_query.answer(results, auto_pagination=True)
 
 
 def main() -> None:
