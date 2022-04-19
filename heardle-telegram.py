@@ -1,8 +1,9 @@
-from ast import Call
 import logging
 from uuid import uuid4
 logging.basicConfig(format='[%(levelname)s] %(message)s', level=logging.INFO)
 from telegram import (
+    InputMessageContent,
+    User,
     CallbackQuery,
     InputTextMessageContent,
     Update,
@@ -15,7 +16,8 @@ from telegram.ext import (
     CommandHandler,
     CallbackContext,
     InlineQueryHandler,
-    CallbackQueryHandler
+    CallbackQueryHandler,
+    ChosenInlineResultHandler
 )
 from heardle_telegram.ytmusic_library import Library
 from heardle_telegram.process_song import ClipGenerator
@@ -47,7 +49,7 @@ def start(update: Update, context: CallbackContext) -> None:
             open(game.get_clip_file(0), 'rb'),
             caption="Clip #1"
         )
-    show_options(update)
+    show_options(user)
     
 def help(update: Update, context: CallbackContext) -> None:
     """Help message"""
@@ -65,7 +67,7 @@ def status(update: Update, context: CallbackContext) -> None:
     logging.info("/status command received")
     update.message.reply_text(f"Game {hash(game)} running")
 
-def show_options(update: Update) -> None:
+def show_options(user: User) -> None:
     """Show options as an inline keyboard"""
     keyboard = [
         [
@@ -73,10 +75,10 @@ def show_options(update: Update) -> None:
             InlineKeyboardButton("Give up", callback_data="/giveup")
         ],
         [
-            InlineKeyboardButton("Guess", switch_inline_query_current_chat="/guess ")
+            InlineKeyboardButton("Guess", switch_inline_query_current_chat="Guess: ")
         ]
     ]
-    update.message.reply_text("Choose an option", reply_markup=InlineKeyboardMarkup(keyboard))
+    user.send_message("Choose an option", reply_markup=InlineKeyboardMarkup(keyboard))
 
 def keyboard_callback(update: Update, context: CallbackContext) -> None:
     if update.callback_query.data == "/pass":
@@ -93,18 +95,19 @@ def increment_move(update: CallbackQuery|Update, game: Game, user_game: UserGame
     user_game.pass_move()
     if user_game.get_guesses() < 6:
         # Send next clip
-        update.message.reply_audio(
+        user.send_audio(
             open(game.get_clip_file(user_game.get_guesses()), 'rb'),
             caption=f"Clip #{user_game.get_guesses() + 1}"
         )
-        show_options(update)
+        show_options(user)
     else:
         # Game over
         user_game.set_defeat()
-        update.message.reply_markdown_v2(
-            f"{user.mention_markdown_v2()} lost the game"
+        user.send_message(
+            f"{user.mention_markdown_v2()} lost the game",
+            parse_mode='MarkdownV2'
         )
-        send_answer(update, game)
+        send_answer(user, game)
 
 def not_started_message(update: Update) -> None:
     """Reply that player has not started"""
@@ -138,45 +141,42 @@ def guess(update: Update, context: CallbackContext) -> None:
         return
     user_game = game.get_user_game(user['id'])
     if user_game.check_done():
-        update.message.reply_markdown_v2(
-            f"Game already finished for {user.mention_markdown_v2()}"
+        user.send_message(
+            f"Game already finished for {user.mention_markdown_v2()}",
+            parse_mode='MarkdownV2'
         )
         return
-    guess_str = ' '.join(context.args)
-    logging.info(f"Guess from user {user['id']}: {guess_str}")
-    if game.check_guess(guess_str) == (True, True):
+    guess_id = update.chosen_inline_result.result_id
+    logging.info(f"Guess from user {user['id']}: {guess_id}")
+    if game.check_guess(guess_id) == (True, True):
         user_game.set_success()
-        update.message.reply_markdown_v2(
-            f"{user.mention_markdown_v2()} finished in {user_game.get_guesses() + 1} moves\!"
+        user.send_message(
+            f"{user.mention_markdown_v2()} finished in {user_game.get_guesses() + 1} moves\!",
+            parse_mode='MarkdownV2'
         )
-        send_answer(update, game)
+        send_answer(user, game)
     else:
-        if game.check_guess(guess_str)[0]:
-            update.message.reply_markdown_v2(
-                f"You got the artist right"
-            )
-        elif game.check_guess(guess_str)[1]:
-            update.message.reply_markdown_v2(
-                f"You got the title right"
-            )
+        if game.check_guess(guess_id)[0]:
+            user.send_message("You got the artist right")
+        elif game.check_guess(guess_id)[1]:
+            user.send_message("You got the title right")
         else:
-            update.message.reply_markdown_v2(
-                f"Wrong answer"
-            )
+            user.send_message("Wrong answer")
         increment_move(update, game, user_game)
 
 def escape_answer_for_markdown(answer) -> tuple[str, str]:
     """Escape characters in answer for markdown response"""
     return (answer[0].replace('-', '\-').replace('(', '\(').replace(')', '\)').replace('.', '\.').replace(';', ' \-'), answer[1])
 
-def send_answer(update: Update, game: Game) -> None:
+def send_answer(user: User, game: Game) -> None:
     """Sends the final answer"""
     answer = escape_answer_for_markdown(game.get_song_answer())
-    update.message.reply_markdown_v2(
+    user.send_message(
         f"The answer is: [{answer[0]}]({answer[1]})",
-        disable_web_page_preview=True
+        disable_web_page_preview=True,
+        parse_mode='MarkdownV2'
     )
-    update.message.reply_audio(
+    user.send_audio(
         open(game.get_clip_file(), 'rb'),
         caption="Full song"
     )
@@ -195,7 +195,7 @@ def give_up(update: CallbackQuery, context: CallbackContext) -> None:
         )
     else:
         user_game.set_defeat()
-    send_answer(update, game)
+    send_answer(user, game)
 
 def suggest_songs(update: Update, context: CallbackContext) -> None:
     """Autocomplete suggestions for guesses"""
@@ -209,9 +209,9 @@ def suggest_songs(update: Update, context: CallbackContext) -> None:
     for suggestion in library.get_song_suggestions(query):
         results.append(
             InlineQueryResultArticle(
-                id=str(uuid4()),
-                title=suggestion.replace(';', ' -'),
-                input_message_content=InputTextMessageContent(f"/guess {suggestion}")
+                id=suggestion.get_id(),
+                title=str(suggestion).replace(';', ' -'),
+                input_message_content=InputTextMessageContent(f"Guess: {str(suggestion)}")
             )
         )
 
@@ -228,7 +228,7 @@ def main() -> None:
     clip_generator.prepare_song(song)
 
     global game
-    game = Game(song, clip_generator)
+    game = Game(song, clip_generator, library)
 
     # Configure Telegram API
     telegram_api_token = open('telegram_api_token').read().strip()
@@ -240,8 +240,8 @@ def main() -> None:
     dispatcher.add_handler(CommandHandler("start", start))
     dispatcher.add_handler(CommandHandler("help", help))
     dispatcher.add_handler(CommandHandler("status", status))
-    dispatcher.add_handler(CommandHandler("guess", guess))
-    dispatcher.add_handler(InlineQueryHandler(suggest_songs, pattern='\/guess .+'))
+    dispatcher.add_handler(InlineQueryHandler(suggest_songs, pattern='Guess: .+'))
+    dispatcher.add_handler(ChosenInlineResultHandler(guess))
     dispatcher.add_handler(CallbackQueryHandler(keyboard_callback))
 
     # Start the Bot

@@ -10,6 +10,10 @@ class Song:
         self.id = song_info['videoId']
         self.url = f"https://music.youtube.com/watch?v={self.id}"
 
+    def get_id(self) -> str:
+        """Get the unique ID for song"""
+        return self.id
+
     def get_url(self) -> str:
         """Get Youtube Music URL for song"""
         return self.url

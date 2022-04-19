@@ -41,10 +41,11 @@ class UserGame:
 
 class Game:
     """One instance of a whole game, i.e. one song"""
-    def __init__(self, song, clip_generator) -> None:
+    def __init__(self, song, clip_generator, library) -> None:
         self.start_time = time()
         self.song = song
         self.clip_generator = clip_generator
+        self.library = library
         self.user_games: dict[int, UserGame] = {}
         logging.info(f"Launching game at {self.start_time}")
 
@@ -73,13 +74,12 @@ class Game:
 
     def check_guess(self, guess) -> tuple[bool, bool]:
         """
-        Check if a guess in the format Artist; Title matches
+        Check if a guess ID matches the solution
         and return a pair of booleans for artist and title
         """
-        if ';' not in guess:
-            # Not in right format
-            return (False, False)
-        artist, title = guess.split(';', 1)
-        artist = artist.strip().lower()
-        title = title.strip().lower()
-        return (artist == self.song.get_artist().lower(), title == self.song.get_title().lower())
+        guess_artist = self.library.get_artist_by_song_id(guess).lower()
+        guess_title = self.library.get_title_by_song_id(guess).lower()
+        return (
+            guess_artist == self.song.get_artist().lower(), 
+            guess_title == self.song.get_title().lower()
+        )

@@ -7,7 +7,7 @@ from .process_song import Song
 
 class Library:
     def __init__(self, force_update=False) -> None:
-        self.songs = []
+        self.songs = dict()
         self.cache = 'library_cache'
         if force_update:
             self.update_cache()
@@ -37,8 +37,16 @@ class Library:
         with open(self.cache, 'r') as cache_fh:
             for line in cache_fh:
                 line = line.strip()
-                self.songs.append(Song(json.loads(line)))
+                song_entry = json.loads(line)
+                self.songs[song_entry['videoId']] = Song(song_entry)
 
+    def get_artist_by_song_id(self, id) -> str:
+        """Get artist for a specific song ID"""
+        return self.songs[id].get_artist()
+
+    def get_title_by_song_id(self, id) -> str:
+        """Get title for a specific song ID"""
+        return self.songs[id].get_title()
 
     def get_song_list(self) -> list:
         """Get list of songs"""
@@ -46,7 +54,7 @@ class Library:
 
     def get_random_song(self) -> Song:
         """Get a random song"""
-        song = random.choice(self.songs)
+        song = random.choice(list(self.songs.values()))
         logging.info(f"Chosen song: {song}")
         return song
 
@@ -55,9 +63,9 @@ class Library:
         n_results = 0
         substr = substr.lower()
         logging.info(f"Suggesting songs matching {substr}")
-        for song in self.songs:
+        for (_, song) in self.songs.items():
             if substr in str(song).lower():
                 n_results += 1
-                yield str(song)
+                yield song
                 if n_results >= max_results:
                     break
