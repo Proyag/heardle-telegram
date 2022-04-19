@@ -2,7 +2,6 @@ import logging
 from uuid import uuid4
 logging.basicConfig(format='[%(levelname)s] %(message)s', level=logging.INFO)
 from telegram import (
-    InputMessageContent,
     User,
     CallbackQuery,
     InputTextMessageContent,
@@ -182,7 +181,7 @@ def give_up(update: CallbackQuery, context: CallbackContext) -> None:
 
 def suggest_songs(update: Update, context: CallbackContext) -> None:
     """Autocomplete suggestions for guesses"""
-    # Strip the first 7 letters: "/guess "
+    # Strip the first 7 characters: "Guess: "
     query = update.inline_query.query[7:]
     
     if query == "":
