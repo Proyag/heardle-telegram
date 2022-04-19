@@ -36,7 +36,14 @@ YTMusic.setup(filepath="headers_auth.json")
 Then paste what you got in the previous step, and press `Ctrl+D`.
 
 ### Configure Telegram Bot API
-Next, create a file called `telegram_api_token` with only your telegram API token for this bot pasted in it.
+Next, create a JSON file called `telegram_config.json` like this:
+```json
+{
+    "api_token": "Fill in your Bot API Token",
+    "subscribers": []
+}
+```
+with your telegram API token for this bot in `api_token` and a list of chat IDs for subscribers who will get new game notifications in `subscribers`.
 
 ## Run
 Run a game with

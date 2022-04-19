@@ -1,5 +1,5 @@
 import logging
-from uuid import uuid4
+import json
 logging.basicConfig(
     format='[%(asctime)s][%(levelname)s] %(message)s',
     datefmt='%d/%m/%Y %H:%M:%S',
@@ -217,7 +217,8 @@ def main() -> None:
     game = Game(song, clip_generator, library)
 
     # Configure Telegram API
-    telegram_api_token = open('telegram_api_token').read().strip()
+    telegram_config = json.load(open('telegram_config.json'))
+    telegram_api_token = telegram_config['api_token']
 
     updater = Updater(token=telegram_api_token)
     dispatcher = updater.dispatcher
@@ -232,6 +233,11 @@ def main() -> None:
 
     # Start the Bot
     updater.start_polling(drop_pending_updates=True)
+    for subscriber in telegram_config['subscribers']:
+        updater.bot.send_message(
+            chat_id=subscriber,
+            text=f"Started new game"
+        )
     updater.idle()
 
 if __name__ == '__main__':
