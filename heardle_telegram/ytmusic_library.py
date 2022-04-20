@@ -30,6 +30,7 @@ class Library:
             for song in songs:
                 json.dump(song, cache_fh)
                 cache_fh.write('\n')
+        logging.info(f"Wrote {len(songs)} songs to cache")
 
     def read_cache(self) -> list:
         """Read song list from cache"""
@@ -39,6 +40,7 @@ class Library:
                 line = line.strip()
                 song_entry = json.loads(line)
                 self.songs[song_entry['videoId']] = Song(song_entry)
+        logging.info(f"Read {len(self.songs)} songs from cache")
 
     def get_artist_by_song_id(self, id) -> str:
         """Get artist for a specific song ID"""

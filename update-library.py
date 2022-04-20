@@ -1,5 +1,9 @@
 import logging
-logging.basicConfig(format='[%(levelname)s] %(message)s', level=logging.INFO)
+logging.basicConfig(
+    format='[%(asctime)s][%(levelname)s] %(message)s',
+    datefmt='%d/%m/%Y %H:%M:%S',
+    level=logging.INFO
+)
 from heardle_telegram.ytmusic_library import Library
 
 _ = Library(force_update=True)
