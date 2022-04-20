@@ -1,7 +1,7 @@
 import os
 import logging
 import youtube_dl
-from pydub import AudioSegment
+from pydub import AudioSegment, silence
 
 class Song:
     def __init__(self, song_info: dict):
@@ -43,7 +43,8 @@ class ClipGenerator:
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'mp3',
             'preferredquality': '192',
-        }]
+        }],
+        'rm_cachedir': True
     }
 
     clip_durations = [1, 2, 3, 5, 10, 20]
@@ -67,6 +68,9 @@ class ClipGenerator:
         """Generate shorter clips from the full song"""
         full_song = AudioSegment.from_mp3(self.full_song)
         logging.info(f"Full song length: {full_song.duration_seconds}")
+        leading_silence_end = silence.detect_leading_silence(full_song)
+        logging.info(f"Trimming {leading_silence_end} ms of silence from beginning")
+        full_song = full_song[leading_silence_end:]
         logging.info(f"Generating clips of lengths (in seconds): {','.join(map(str, self.clip_durations))}")
         for l in self.clip_durations:
             clip = full_song[:l*1000]
