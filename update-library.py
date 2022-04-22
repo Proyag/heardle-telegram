@@ -4,7 +4,7 @@ from heardle_telegram.ytmusic_library import Library
 
 def parse_args() -> argparse.Namespace:
     arg_parser = argparse.ArgumentParser(
-        description="Update library for and write to file for heardle-telegram",
+        description="Update library and write to file for heardle-telegram",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         add_help=True
     )
