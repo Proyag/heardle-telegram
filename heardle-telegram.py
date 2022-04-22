@@ -165,10 +165,6 @@ def send_answer(user: User, game: Game) -> None:
         disable_web_page_preview=True,
         parse_mode='MarkdownV2'
     )
-    user.send_audio(
-        open(game.get_clip_file(), 'rb'),
-        caption="Full song"
-    )
 
 def give_up(update: CallbackQuery, context: CallbackContext) -> None:
     """Give up and show the answer"""
