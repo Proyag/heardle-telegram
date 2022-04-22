@@ -6,9 +6,9 @@ from ytmusicapi import YTMusic
 from .process_song import Song
 
 class Library:
-    def __init__(self, force_update=False) -> None:
+    def __init__(self, force_update=False, cache='library_cache') -> None:
         self.songs = dict()
-        self.cache = 'library_cache'
+        self.cache = cache
         if force_update:
             self.update_cache()
         else:

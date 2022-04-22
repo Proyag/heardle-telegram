@@ -215,12 +215,17 @@ def parse_args() -> argparse.Namespace:
         "--log-file",
         help="File to write logs"
     )
+    arg_parser.add_argument(
+        "--cache",
+        default='library_cache',
+        help="File to use as library of songs"
+    )
     return arg_parser.parse_args()
 
 
 def main(options: argparse.Namespace) -> None:
     global library
-    library = Library()
+    library = Library(cache=options.cache)
     # Pick a random song
     song = library.get_random_song()
     # Download the song and generate clips
