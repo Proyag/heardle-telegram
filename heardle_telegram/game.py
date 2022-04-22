@@ -1,5 +1,5 @@
 import logging
-from time import time
+import time
 from prettytable import PrettyTable
 
 class UserGame:
@@ -48,7 +48,7 @@ class UserGame:
 class Game:
     """One instance of a whole game, i.e. one song"""
     def __init__(self, song, clip_generator, library) -> None:
-        self.start_time = time()
+        self.start_time = time.strftime('%Y%m%d%H%M%S', time.gmtime())
         self.song = song
         self.clip_generator = clip_generator
         self.library = library

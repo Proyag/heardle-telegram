@@ -1,6 +1,8 @@
 import argparse
 import json
 import logging
+import os
+import time
 from telegram import (
     User,
     CallbackQuery,
@@ -211,21 +213,12 @@ def parse_args() -> argparse.Namespace:
     )
     arg_parser.add_argument(
         "--log-file",
-        default="logs/game.log",
         help="File to write logs"
     )
     return arg_parser.parse_args()
 
 
-def main() -> None:
-    logging.basicConfig(
-        format='[%(asctime)s][%(levelname)s] %(message)s',
-        datefmt='%d/%m/%Y %H:%M:%S',
-        level=logging.INFO
-    )
-    options = parse_args()
-    logging.getLogger().addHandler(logging.FileHandler(options.log_file))
-
+def main(options: argparse.Namespace) -> None:
     global library
     library = Library()
     # Pick a random song
@@ -274,4 +267,13 @@ def main() -> None:
         )
 
 if __name__ == '__main__':
-    main()
+    logging.basicConfig(
+        format='[%(asctime)s][%(levelname)s] %(message)s',
+        datefmt='%Y/%m/%d %H:%M:%S',
+        level=logging.INFO
+    )
+    options = parse_args()
+    if not options.log_file:
+        options.log_file = os.path.join("logs", f"game{time.strftime('%Y%m%d%H%M%S', time.gmtime())}.log")
+    logging.getLogger().addHandler(logging.FileHandler(options.log_file))
+    main(options)
