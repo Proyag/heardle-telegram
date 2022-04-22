@@ -1,5 +1,6 @@
-import logging
+import argparse
 import json
+import logging
 logging.basicConfig(
     format='[%(asctime)s][%(levelname)s] %(message)s',
     datefmt='%d/%m/%Y %H:%M:%S',
@@ -199,8 +200,23 @@ def suggest_songs(update: Update, context: CallbackContext) -> None:
 
     update.inline_query.answer(results, auto_pagination=True)
 
+def parse_args() -> argparse.Namespace:
+    arg_parser = argparse.ArgumentParser(
+        description="Launch a game of heardle-telegram",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        add_help=True
+    )
+    arg_parser.add_argument(
+        "--no-notify",
+        action='store_true',
+        help="Don't send notifications to subscribed telegram chats"
+    )
+    return arg_parser.parse_args()
+
 
 def main() -> None:
+    options = parse_args()
+
     global library
     library = Library()
     # Pick a random song
@@ -229,12 +245,20 @@ def main() -> None:
 
     # Start the Bot
     updater.start_polling(drop_pending_updates=True)
-    for subscriber in telegram_config['subscribers']:
-        updater.bot.send_message(
-            chat_id=subscriber,
-            text=f"Started new game"
-        )
+    if not options.no_notify:
+        for subscriber in telegram_config['subscribers']:
+            updater.bot.send_message(
+                chat_id=subscriber,
+                text=f"Launched new game"
+            )
     updater.idle()
+    # End game
+    if not options.no_notify:
+        for subscriber in telegram_config['subscribers']:
+            updater.bot.send_message(
+                chat_id=subscriber,
+                text=f"Game ended"
+            )
 
 if __name__ == '__main__':
     main()
