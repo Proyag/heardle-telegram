@@ -107,6 +107,7 @@ def increment_move(update: CallbackQuery|Update, game: Game, user_game: UserGame
     else:
         # Game over
         user_game.set_defeat()
+        game.register_final_score(user['id'], user_game.get_guesses() + 1)
         user.send_message(
             f"{user.mention_markdown_v2()} lost the game",
             parse_mode='MarkdownV2'
@@ -140,6 +141,7 @@ def guess(update: Update, context: CallbackContext) -> None:
     logging.info(f"Guess from user {user['username']}: {guess_id}")
     if game.check_guess(guess_id) == (True, True):
         user_game.set_success()
+        game.register_final_score(user['id'], user_game.get_guesses() + 1)
         user.send_message(
             f"{user.mention_markdown_v2()} finished in {user_game.get_guesses() + 1} moves\!",
             parse_mode='MarkdownV2'
@@ -178,6 +180,7 @@ def give_up(update: CallbackQuery, context: CallbackContext) -> None:
         )
     else:
         user_game.set_defeat()
+        game.register_final_score(user['id'], 7)
     send_answer(user, game)
 
 def suggest_songs(update: Update, context: CallbackContext) -> None:
@@ -252,13 +255,17 @@ def main() -> None:
                 text=f"Launched new game"
             )
     updater.idle()
+
     # End game
-    if not options.no_notify:
-        for subscriber in telegram_config['subscribers']:
-            updater.bot.send_message(
-                chat_id=subscriber,
-                text=f"Game ended"
-            )
+    scoreboard = game.show_scoreboard()
+    logging.info(f"Final scores:\n{scoreboard}")
+    # Send scoreboard to everyone who played
+    for user_id in game.get_played_users():
+        updater.bot.send_message(
+            chat_id=user_id,
+            text=f"Final scores:\n```\n{scoreboard}\n```",
+            parse_mode='MarkdownV2'
+        )
 
 if __name__ == '__main__':
     main()

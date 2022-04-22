@@ -1,5 +1,6 @@
 import logging
 from time import time
+from prettytable import PrettyTable
 
 class UserGame:
     """One user playing one game"""
@@ -37,7 +38,7 @@ class UserGame:
 
     def set_success(self) -> None:
         """Set user game as won"""
-        logging.info(f"User {self.username} won the game")
+        logging.info(f"User {self.username} won the game in {self.get_guesses() + 1} guesses")
         self.success = True
 
     def check_done(self) -> bool:
@@ -52,6 +53,7 @@ class Game:
         self.clip_generator = clip_generator
         self.library = library
         self.user_games: dict[int, UserGame] = {}
+        self.scores: dict[int, int] = {}
         logging.info(f"Launching game at {self.start_time}")
 
     def __hash__(self):
@@ -73,6 +75,10 @@ class Game:
         """Get a specific user's game"""
         return self.user_games[user_id]
 
+    def get_played_users(self) -> list[int]:
+        """Get a list of user IDs that have played this game"""
+        return self.user_games.keys()
+
     def get_song_answer(self) -> tuple[str, str]:
         """Reveal the answer"""
         return (str(self.song), self.song.get_url())
@@ -88,3 +94,19 @@ class Game:
             guess_artist == self.song.get_artist().lower(), 
             guess_title == self.song.get_title().lower()
         )
+
+    def register_final_score(self, user_id, score) -> None:
+        """Add a user's score to the scoreboard when they're finished"""
+        self.scores[user_id] = score
+
+    def show_scoreboard(self) -> str:
+        """Display scoreboard (at the end of a game).
+        Unfortunately Telegram doesn't support markdown tables"""
+        scoreboard = PrettyTable()
+        scoreboard.field_names = ["Username", "Score"]
+        for user_id in sorted(self.scores, key=self.scores.get):
+            scoreboard.add_row([
+                self.user_games[user_id].get_username(),
+                f"{self.scores[user_id] if self.scores[user_id] <= 6 else 'X'}/6"
+            ])
+        return scoreboard
