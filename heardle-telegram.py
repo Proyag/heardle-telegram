@@ -125,7 +125,7 @@ def pass_move(update: CallbackQuery, context: CallbackContext) -> None:
 
 def guess(update: Update, context: CallbackContext) -> None:
     """Take a guess"""
-    logging.info("/guess command received")
+    logging.info("Guess received")
     user = update.effective_user
     user_game = game.get_user_game(user['id'])
     if user_game.check_done():
@@ -194,7 +194,7 @@ def suggest_songs(update: Update, context: CallbackContext) -> None:
             InlineQueryResultArticle(
                 id=suggestion.get_id(),
                 title=str(suggestion).replace(';', ' -'),
-                input_message_content=InputTextMessageContent(f"Guess: {str(suggestion)}")
+                input_message_content=InputTextMessageContent(f"Guess: {str(suggestion).replace(';', ' -')}")
             )
         )
 
