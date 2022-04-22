@@ -3,3 +3,4 @@ song_clips/
 headers_auth.json
 heardle_telegram/__pycache__/
 telegram_config.json
+logs/
