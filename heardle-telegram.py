@@ -1,11 +1,6 @@
 import argparse
 import json
 import logging
-logging.basicConfig(
-    format='[%(asctime)s][%(levelname)s] %(message)s',
-    datefmt='%d/%m/%Y %H:%M:%S',
-    level=logging.INFO
-)
 from telegram import (
     User,
     CallbackQuery,
@@ -214,11 +209,22 @@ def parse_args() -> argparse.Namespace:
         action='store_true',
         help="Don't send notifications to subscribed telegram chats"
     )
+    arg_parser.add_argument(
+        "--log-file",
+        default="logs/game.log",
+        help="File to write logs"
+    )
     return arg_parser.parse_args()
 
 
 def main() -> None:
+    logging.basicConfig(
+        format='[%(asctime)s][%(levelname)s] %(message)s',
+        datefmt='%d/%m/%Y %H:%M:%S',
+        level=logging.INFO
+    )
     options = parse_args()
+    logging.getLogger().addHandler(logging.FileHandler(options.log_file))
 
     global library
     library = Library()

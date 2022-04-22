@@ -54,3 +54,4 @@ python heardle-telegram.py
 
 ### Options:
 `--no-notify`: Don't send notifications to subscribed telegram chats. (Useful while testing)
+`--log-file`: File to write logs (in addition to console)
