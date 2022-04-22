@@ -3,8 +3,9 @@ from time import time
 
 class UserGame:
     """One user playing one game"""
-    def __init__(self, user_id, game_id) -> None:
-        self.user_id = user_id
+    def __init__(self, user, game_id) -> None:
+        self.user_id = user['id']
+        self.username = user['username']
         self.game_id = game_id
         self.guesses = 0
         self.defeat = False
@@ -17,6 +18,10 @@ class UserGame:
         """Get user ID"""
         return self.user_id
 
+    def get_username(self) -> str:
+        """Get username"""
+        return self.username
+
     def pass_move(self) -> None:
         """User passes; guess used up"""
         self.guesses += 1
@@ -27,12 +32,12 @@ class UserGame:
 
     def set_defeat(self) -> None:
         """Set user game as over"""
-        logging.info(f"Setting game over for user {self.user_id}")
+        logging.info(f"Setting game over for user {self.username}")
         self.defeat = True
 
     def set_success(self) -> None:
         """Set user game as won"""
-        logging.info(f"User {self.user_id} won the game")
+        logging.info(f"User {self.username} won the game")
         self.success = True
 
     def check_done(self) -> bool:
@@ -56,9 +61,9 @@ class Game:
         """Check if a user has started today's game"""
         return user_id in self.user_games.keys()
 
-    def new_user_game(self, user_id) -> None:
+    def new_user_game(self, user) -> None:
         """Create a new user game"""
-        self.user_games[user_id] = UserGame(user_id, self.__hash__())
+        self.user_games[user['id']] = UserGame(user, self.__hash__())
 
     def get_clip_file(self, clip_num=None) -> str:
         """Get a specific clip of the song"""
