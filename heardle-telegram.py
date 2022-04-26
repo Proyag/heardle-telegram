@@ -264,9 +264,9 @@ def main(options: argparse.Namespace) -> None:
     scoreboard = game.show_scoreboard()
     logging.info(f"Final scores:\n{scoreboard}")
     # Send scoreboard to everyone who played
-    for user_id in game.get_played_users():
+    or subscriber in telegram_config['subscribers']:
         updater.bot.send_message(
-            chat_id=user_id,
+            chat_id=subscriber,
             text=f"Final scores:\n```\n{scoreboard}\n```",
             parse_mode='MarkdownV2'
         )
