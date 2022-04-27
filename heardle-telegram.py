@@ -263,13 +263,14 @@ def main(options: argparse.Namespace) -> None:
     # End game
     scoreboard = game.show_scoreboard()
     logging.info(f"Final scores:\n{scoreboard}")
-    # Send scoreboard to everyone who played
-    for subscriber in telegram_config['subscribers']:
-        updater.bot.send_message(
-            chat_id=subscriber,
-            text=f"Final scores:\n```\n{scoreboard}\n```",
-            parse_mode='MarkdownV2'
-        )
+    # Send scoreboard to subscribers
+    if not options.no_notify:
+        for subscriber in telegram_config['subscribers']:
+            updater.bot.send_message(
+                chat_id=subscriber,
+                text=f"Final scores:\n```\n{scoreboard}\n```",
+                parse_mode='MarkdownV2'
+            )
 
 if __name__ == '__main__':
     logging.basicConfig(
