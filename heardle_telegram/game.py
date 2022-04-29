@@ -20,8 +20,11 @@ class UserGame:
         return self.user_id
 
     def get_username(self) -> str:
-        """Get username"""
-        return self.username
+        """Get username, or back off to ID if username is not set"""
+        if self.username is not None:
+            return self.username
+        else:
+            return str(self.get_id())
 
     def pass_move(self) -> None:
         """User passes; guess used up"""
@@ -33,12 +36,12 @@ class UserGame:
 
     def set_defeat(self) -> None:
         """Set user game as over"""
-        logging.info(f"Setting game over for user {self.username}")
+        logging.info(f"Setting game over for user {self.get_username()}")
         self.defeat = True
 
     def set_success(self) -> None:
         """Set user game as won"""
-        logging.info(f"User {self.username} won the game in {self.get_guesses() + 1} guesses")
+        logging.info(f"User {self.get_username()} won the game in {self.get_guesses() + 1} guesses")
         self.success = True
 
     def check_done(self) -> bool:
@@ -103,7 +106,7 @@ class Game:
         """Display scoreboard (at the end of a game).
         Unfortunately Telegram doesn't support markdown tables"""
         scoreboard = PrettyTable()
-        scoreboard.field_names = ["Username", "Score"]
+        scoreboard.field_names = ["User", "Score"]
         for user_id in sorted(self.scores, key=self.scores.get):
             scoreboard.add_row([
                 self.user_games[user_id].get_username(),

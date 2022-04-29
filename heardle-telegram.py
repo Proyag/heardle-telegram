@@ -35,13 +35,13 @@ def start(update: Update, context: CallbackContext) -> None:
             )
             return
         else:
-            logging.info(f"{user['username']} already started")
+            logging.info(f"{user['username']} [{user['id']}] already started")
             update.message.reply_markdown_v2(
                 f"{user.mention_markdown_v2()} has already started this game"
             )
     else:
         game.new_user_game(user)
-        logging.info(f"Started game {hash(game)} for user {user['username']}")
+        logging.info(f"Started game {hash(game)} for user {user['username']} [{user['id']}]")
         update.message.reply_markdown_v2(
             f"Started game for {user.mention_markdown_v2()}"
         )
@@ -135,7 +135,7 @@ def guess(update: Update, context: CallbackContext) -> None:
         )
         return
     guess_id = update.chosen_inline_result.result_id
-    logging.info(f"Guess from user {user['username']}: {guess_id}")
+    logging.info(f"Guess from user {user['username']} [{user['id']}]: {guess_id}")
     if game.check_guess(guess_id) == (True, True):
         user_game.set_success()
         game.register_final_score(user['id'], user_game.get_guesses() + 1)
