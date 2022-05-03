@@ -29,7 +29,8 @@ def start(update: Update, context: CallbackContext) -> None:
     logging.info("/start command received")
     user = update.effective_user
     if game.check_user_started(user['id']):
-        if game.get_user_game(user['id']).check_done():
+        user_game = game.get_user_game(user['id'])
+        if user_game.check_done():
             update.message.reply_markdown_v2(
                 f"Game already finished for {user.mention_markdown_v2()}"
             )
@@ -39,6 +40,15 @@ def start(update: Update, context: CallbackContext) -> None:
             update.message.reply_markdown_v2(
                 f"{user.mention_markdown_v2()} has already started this game"
             )
+            logging.info(f"Getting latest clip for {user['id']}")
+            # Get the latest game state for user
+            guess_count = user_game.get_guesses()
+            # Resend clip
+            update.message.reply_audio(
+                open(game.get_clip_file(guess_count), 'rb'),
+                caption="Clip #%s" %(guess_count+1)
+            )
+
     else:
         game.new_user_game(user)
         logging.info(f"Started game {hash(game)} for user {user['username']} [{user['id']}]")
