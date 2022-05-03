@@ -68,7 +68,7 @@ def help(update: Update, context: CallbackContext) -> None:
     update.message.reply_text(
         "Heardle telegram bot\n"
         "/help: Get this help message\n"
-        "/start: Start playing current game\n"
+        "/start: Start playing current game, or retrieve current clip\n"
         "/status: Check whether game is running\n"
         "Play using the chat buttons"
     )
