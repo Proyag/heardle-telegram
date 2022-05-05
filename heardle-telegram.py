@@ -230,6 +230,11 @@ def parse_args() -> argparse.Namespace:
         default='library_cache',
         help="File to use as library of songs"
     )
+    arg_parser.add_argument(
+        "--telegram-config",
+        default='telegram_config.json',
+        help="File containing config data for Telegram"
+    )
     return arg_parser.parse_args()
 
 
@@ -246,7 +251,7 @@ def main(options: argparse.Namespace) -> None:
     game = Game(song, clip_generator, library)
 
     # Configure Telegram API
-    telegram_config = json.load(open('telegram_config.json'))
+    telegram_config = json.load(open(options.telegram_config))
     telegram_api_token = telegram_config['api_token']
 
     updater = Updater(token=telegram_api_token)
