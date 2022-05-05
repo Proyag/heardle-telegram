@@ -55,4 +55,5 @@ python heardle-telegram.py
 ### Options:
 `--no-notify`: Don't send notifications to subscribed telegram chats. (Useful while testing)
 `--log-file LOG_FILE`: File to write logs (in addition to console)
-`--cache CACHE`: File to use as library of songs
+`--cache CACHE`: File to use as library of songs (default: library_cache)
+`--telegram-config TELEGRAM_CONFIG`: File containing config data for Telegram (default: telegram_config.json)
