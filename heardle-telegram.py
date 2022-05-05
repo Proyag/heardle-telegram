@@ -66,6 +66,8 @@ def help(update: Update, context: CallbackContext) -> None:
         "/help: Get this help message\n"
         "/start: Start playing current game, or retrieve current clip\n"
         "/status: Check whether game is running\n"
+        "/subscribe: Subscribe to game start/score notifications\n"
+        "/unsubscribe: Unsubscribe from game start/score notification\n"
         "Play using the chat buttons"
     )
 
@@ -224,6 +226,42 @@ def suggest_songs(update: Update, context: CallbackContext) -> None:
 
     update.inline_query.answer(results, auto_pagination=True)
 
+def subscribe(update: Update, config_file: str) -> None:
+    """Subscribe a user to receive game start/score notifications"""
+    user_id = update.effective_user['id']
+    telegram_config = json.load(open(config_file))
+    if user_id not in telegram_config['subscribers']:
+        telegram_config['subscribers'].append(user_id)
+        json.dump(telegram_config, open(config_file, 'w'), indent=4)
+        logging.info(f"{user_id} subscribed")
+        update.message.reply_text(
+            "You are now subscribed to game start/score notifications. "
+            "Send /unsubscribe to unsubscribe."
+        )
+    else:
+        logging.info(f"{user_id} already subscribed")
+        update.message.reply_text(
+            "You are already subscribed to game start/score notifications."
+        )
+
+def unsubscribe(update: Update, config_file: str) -> None:
+    """Unsubscribe a user from receiving game start/score notifications"""
+    user_id = update.effective_user['id']
+    telegram_config = json.load(open(config_file))
+    if user_id in telegram_config['subscribers']:
+        telegram_config['subscribers'].remove(user_id)
+        json.dump(telegram_config, open(config_file, 'w'), indent=4)
+        logging.info(f"{user_id} unsubscribed")
+        update.message.reply_text(
+            "You have unsubscribed from game start/score notifications. "
+            "Send /subscribe to subscribe again."
+        )
+    else:
+        logging.info(f"{user_id} is not subscribed")
+        update.message.reply_text(
+            "You are not subscribed to game start/score notifications."
+        )
+
 def parse_args() -> argparse.Namespace:
     arg_parser = argparse.ArgumentParser(
         description="Launch a game of heardle-telegram",
@@ -273,8 +311,14 @@ def main(options: argparse.Namespace) -> None:
 
     # Command handlers
     dispatcher.add_handler(CommandHandler("start", start))
-    dispatcher.add_handler(CommandHandler("help", help))
     dispatcher.add_handler(CommandHandler("status", status))
+    dispatcher.add_handler(CommandHandler("subscribe",
+        lambda update, context: subscribe(update, options.telegram_config)
+    ))
+    dispatcher.add_handler(CommandHandler("unsubscribe",
+        lambda update, context: unsubscribe(update, options.telegram_config)
+    ))
+    dispatcher.add_handler(CommandHandler("help", help))
     dispatcher.add_handler(InlineQueryHandler(suggest_songs, pattern='Guess: .+'))
     dispatcher.add_handler(ChosenInlineResultHandler(guess))
     dispatcher.add_handler(CallbackQueryHandler(keyboard_callback))
