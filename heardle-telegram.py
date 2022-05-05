@@ -121,10 +121,18 @@ def increment_move(update: CallbackQuery|Update, game: Game, user_game: UserGame
         )
         send_answer(user, game)
 
+def not_started_message(user: User) -> None:
+    """Reply that player has not started"""
+    logging.info(f"{user['id']} has not started this game")
+    user.send_message("You have not started the current game")
+
 def pass_move(update: CallbackQuery, context: CallbackContext) -> None:
     """Pass and get next clip"""
     logging.info("/pass command received")
     user = update.from_user
+    if not game.check_user_started(user['id']):		
+        not_started_message(user)
+        return
     user_game = game.get_user_game(user['id'])
     if user_game.check_done():
         update.message.reply_markdown_v2(
@@ -137,6 +145,9 @@ def guess(update: Update, context: CallbackContext) -> None:
     """Take a guess"""
     logging.info("Guess received")
     user = update.effective_user
+    if not game.check_user_started(user['id']):		
+        not_started_message(user)
+        return
     user_game = game.get_user_game(user['id'])
     if user_game.check_done():
         user.send_message(
@@ -180,6 +191,9 @@ def give_up(update: CallbackQuery, context: CallbackContext) -> None:
     """Give up and show the answer"""
     logging.info("/giveup command received")
     user = update.from_user
+    if not game.check_user_started(user['id']):		
+        not_started_message(user)
+        return
     user_game = game.get_user_game(user['id'])
     if user_game.check_done():
         update.message.reply_markdown_v2(
