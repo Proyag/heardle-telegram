@@ -43,11 +43,6 @@ def start(update: Update, context: CallbackContext) -> None:
             logging.info(f"Getting latest clip for {user['id']}")
             # Get the latest game state for user
             guess_count = user_game.get_guesses()
-            # Resend clip
-            update.message.reply_audio(
-                open(game.get_clip_file(guess_count), 'rb'),
-                caption="Clip #%s" %(guess_count+1)
-            )
 
     else:
         game.new_user_game(user)
@@ -55,12 +50,13 @@ def start(update: Update, context: CallbackContext) -> None:
         update.message.reply_markdown_v2(
             f"Started game for {user.mention_markdown_v2()}"
         )
+        guess_count = 0
         # Start with the first (shortest) clip
-        update.message.reply_audio(
-            open(game.get_clip_file(0), 'rb'),
-            caption="Clip #1"
-        )
-    show_options(user)
+    update.message.reply_audio(
+        open(game.get_clip_file(guess_count), 'rb'),
+        caption=f"Clip #{guess_count + 1}"
+    )
+    show_options(user, no_pass_button=(guess_count==5))
     
 def help(update: Update, context: CallbackContext) -> None:
     """Help message"""
@@ -78,7 +74,7 @@ def status(update: Update, context: CallbackContext) -> None:
     logging.info("/status command received")
     update.message.reply_text(f"Game {hash(game)} running")
 
-def show_options(user: User) -> None:
+def show_options(user: User, no_pass_button: bool=False) -> None:
     """Show options as an inline keyboard"""
     keyboard = [
         [
@@ -89,6 +85,9 @@ def show_options(user: User) -> None:
             InlineKeyboardButton("Guess", switch_inline_query_current_chat="Guess: ")
         ]
     ]
+    if no_pass_button:
+        # Remove Pass button
+        del keyboard[0][0]
     user.send_message("Choose an option", reply_markup=InlineKeyboardMarkup(keyboard))
 
 def keyboard_callback(update: Update, context: CallbackContext) -> None:
@@ -104,17 +103,18 @@ def increment_move(update: CallbackQuery|Update, game: Game, user_game: UserGame
     else:
         user = update.from_user
     user_game.pass_move()
-    if user_game.get_guesses() < 6:
+    guess_count = user_game.get_guesses()
+    if guess_count < 6:
         # Send next clip
         user.send_audio(
             open(game.get_clip_file(user_game.get_guesses()), 'rb'),
             caption=f"Clip #{user_game.get_guesses() + 1}"
         )
-        show_options(user)
+        show_options(user, no_pass_button=(guess_count==5))
     else:
         # Game over
         user_game.set_defeat()
-        game.register_final_score(user['id'], user_game.get_guesses() + 1)
+        game.register_final_score(user['id'], guess_count + 1)
         user.send_message(
             f"{user.mention_markdown_v2()} lost the game",
             parse_mode='MarkdownV2'
