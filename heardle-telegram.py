@@ -338,10 +338,13 @@ def main(options: argparse.Namespace) -> None:
     logging.info(f"Final scores:\n{scoreboard}")
     # Send scoreboard to subscribers
     if not options.no_notify:
+        answer = escape_answer_for_markdown(game.get_song_answer())
         for subscriber in telegram_config['subscribers']:
             updater.bot.send_message(
                 chat_id=subscriber,
-                text=f"Final scores:\n```\n{scoreboard}\n```",
+                text=f"The answer was: [{answer[0]}]({answer[1]})\n\n"
+                     f"Final scores:\n```\n{scoreboard}\n```",
+                disable_web_page_preview=True,
                 parse_mode='MarkdownV2'
             )
 
