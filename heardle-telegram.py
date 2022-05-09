@@ -206,7 +206,7 @@ def give_up(update: CallbackQuery, context: CallbackContext) -> None:
         game.register_final_score(user['id'], 7)
     send_answer(user, game)
 
-def suggest_songs(update: Update, context: CallbackContext) -> None:
+def suggest_songs(update: Update, max_results) -> None:
     """Autocomplete suggestions for guesses"""
     # Strip the first 7 characters: "Guess: "
     query = update.inline_query.query[7:]
@@ -215,7 +215,7 @@ def suggest_songs(update: Update, context: CallbackContext) -> None:
         return
 
     results = []
-    for suggestion in library.get_song_suggestions(query):
+    for suggestion in library.get_song_suggestions(query, max_results=max_results):
         results.append(
             InlineQueryResultArticle(
                 id=suggestion.get_id(),
@@ -287,6 +287,11 @@ def parse_args() -> argparse.Namespace:
         default='telegram_config.json',
         help="File containing config data for Telegram"
     )
+    arg_parser.add_argument(
+        "--max-suggestions",
+        type=int, default=999,
+        help="Maximum number of suggestions shown while guessing"
+    )
     return arg_parser.parse_args()
 
 
@@ -319,7 +324,9 @@ def main(options: argparse.Namespace) -> None:
         lambda update, context: unsubscribe(update, options.telegram_config)
     ))
     dispatcher.add_handler(CommandHandler("help", help))
-    dispatcher.add_handler(InlineQueryHandler(suggest_songs, pattern='Guess: .+'))
+    dispatcher.add_handler(InlineQueryHandler(
+        lambda update, context: suggest_songs(update, options.max_suggestions),
+        pattern='Guess: .+'))
     dispatcher.add_handler(ChosenInlineResultHandler(guess))
     dispatcher.add_handler(CallbackQueryHandler(keyboard_callback))
 

@@ -57,3 +57,4 @@ python heardle-telegram.py
 `--log-file LOG_FILE`: File to write logs (in addition to console)
 `--cache CACHE`: File to use as library of songs (default: library_cache)
 `--telegram-config TELEGRAM_CONFIG`: File containing config data for Telegram (default: telegram_config.json)
+`--max-suggestions MAX_SUGGESTIONS`: Maximum number of suggestions shown while guessing (default: 999)
